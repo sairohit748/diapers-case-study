@@ -1,0 +1,200 @@
+FILENAME REFFILE '/home/sxj1757300/sasuser.v94/Diapers/panel_withBrnd.csv';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=CSV
+	OUT=WORK.IMPORT;
+	GETNAMES=YES;
+RUN;
+
+proc print data = work.import;
+run;
+proc freq data = work.import ;table panid/ out= a10 outexpect;run;
+data a2;
+set work.import(where=(brand ="HUGGIES"));
+run;
+
+
+data a8;
+set a2;
+money = dollars/(n_diaper*units);run;
+
+proc means data = a8;
+var week money;class panid;
+output out=fin max(week)=recency sum(money)=monetary;run;
+data c1;
+set fin;
+if panid = "." then delete;run;
+
+proc freq data = a8;
+table panid/out= try; run;
+
+
+proc sort data = c1;
+by panid;run;
+proc sort data = try;
+by panid;
+run;
+data c3;
+merge c1 try;
+by panid;
+run;
+
+
+
+data a9;
+set c3;
+if panid = "." then delete;
+run;
+
+proc print data=a9;
+run;
+
+
+proc rank data=a9 out=b10 ties=low groups=3;var monetary;ranks rnkscore;run;
+proc print data=b10;run;
+proc freq data=b10;table rnkscore;run;
+
+data b1a;set b10;if recency="." then recency=0;run;
+proc rank data=b1a out=b11 ties=low groups=3;var recency;ranks rnkd;run;
+proc print data=b11 (obs=100);run;
+
+proc rank data=b11 out=b13 ties=low groups=3;var count;ranks rnkfreq;run;
+proc print data=b13 (obs=100);run;
+proc corr data = b13 ;var recency _freq_ monetary;run;
+
+data b14;
+set b13(where=((rnkscore = 0 and rnkd = 2)or(rnkscore = 2 and rnkd = 0)or(rnkscore = 0 and rnkd = 0)));
+run;
+
+data b15;
+set b13(where=((rnkscore = 2 and rnkd = 2)or(rnkscore = 1 and rnkd = 2)or(rnkscore = 2 and rnkd = 1)));
+run;
+
+data b16;
+set b13(where=((rnkscore = 0 and rnkd = 1)or(rnkscore = 1 and rnkd = 0)or(rnkscore = 1 and rnkd = 1)));
+run;
+
+
+FILENAME REFFILE '/home/sxj1757300/sasuser.v94/Diapers/ads demo1.csv';
+
+PROC IMPORT DATAFILE=REFFILE
+	DBMS=CSV
+	OUT=WORK.IMPORT14;
+	GETNAMES=YES;
+RUN;
+
+proc sort data = b14;by panid;run;
+proc sort data = work.import14;by panid;run;
+
+data d17;
+merge work.import14 b14;
+by panid;run;
+
+data d18;
+set d17;
+if _freq_ = "." then delete;run;
+
+proc freq data = d18;
+table Income;run;
+proc freq data = d18;
+table Family_Size;run;
+proc freq data = d18;
+table HH_RACE;run;
+proc freq data = d18;
+table Type_of_Residential_Possession;run;
+proc freq data = d18;
+table Age_Group_Applied_to_Male_HH;run;
+proc freq data = d18;
+table Education_Level_Male_HH;run;
+proc freq data = d18;
+table Occupation_Male_HH;run;
+proc freq data = d18;
+table Male_Working_Hour;run;
+proc freq data = d18;
+table Age_Group_Female_HH;run;
+proc freq data = d18;
+table Education_Level_Female_HH;run;
+proc freq data = d18;
+table Occupation_Female_HH;run;
+proc freq data = d18;
+table Female_Working_Hour;run;
+proc freq data = d18;
+table Number_of_Dogs;run;
+proc freq data = d18;
+table Number_of_Cats;run;
+proc freq data = d18;
+table Children_Group_Code;run;
+proc freq data = d18;
+table Marital_Status;run;
+
+proc freq data = d18;
+table HH_RACE*Type_of_Residential_Possession;run;
+proc freq data = d18;
+table Income*Type_of_Residential_Possession;run;
+proc freq data = d18;
+table HH_RACE*Income;run;
+proc freq data = d18;
+table Age_Group_Applied_to_Male_HH*Education_Level_Male_HH;run;
+proc freq data = d18;
+table Male_Working_Hour*Age_Group_Applied_to_Male_HH;run;
+proc freq data = d18;
+table Male_Working_Hour*Education_Level_Male_HH;run;
+proc freq data = d18;
+table Age_Group_Female_HH*Age_Group_Applied_to_Male_HH;run;
+proc freq data = d18;
+table Education_Level_Female_HH*Occupation_Female_HH;run;
+proc freq data = d18;
+table Education_Level_Female_HH*Occupation_Female_HH;run;
+proc freq data = d18;
+table Children_Group_Code*Marital_Status;
+run;
+proc freq data = d18;
+table Children_Group_Code*Male_Working_Hour;
+run;
+proc freq data = d18;
+table Children_Group_Code*Female_Working_Hour;
+run;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2  2
+2  1
+1  2
+1  1
+1  0
+0  1
+0  2
+2  0
+0  0
